@@ -1,0 +1,28 @@
+:root {
+  /* Light theme */
+  --surface-background: #f3f5f5;
+  --surface-layer-1: #ffffff;
+  --surface-layer-contrast: #292e36;
+  --surface-layer-translucent: #6c7b9314;
+  --border-regular: #52617a1f;
+  --text-primary: #2b313b;
+  --text-secondary: #2b313ba6;
+  --text-contrast-primary: #f1f2f4;
+  --icon-primary: #2b313b;
+  --icon-contrast-primary: #f1f2f4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-background: #131416;
+    --surface-layer-1: #2d3033;
+    --surface-layer-contrast: #e3e5e8;
+    --surface-layer-translucent: #a9b0bc1a;
+    --border-regular: #8a95a829;
+    --text-primary: #e9eaed;
+    --text-secondary: #e9eaeda6;
+    --text-contrast-primary: #21252c;
+    --icon-primary: #e9eaed;
+    --icon-contrast-primary: #21252c;
+  }
+}

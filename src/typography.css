@@ -1,0 +1,87 @@
+:root {
+  --font-weight-bold: 700;
+}
+
+h1,
+.h1 {
+  font-size: 34px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 40px; /* 117.647% */
+  letter-spacing: -0.015em;
+}
+
+h2,
+.h2 {
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 36px; /* 120% */
+  letter-spacing: -0.013em;
+}
+
+h3,
+.h3 {
+  font-size: 27px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32px; /* 118.519% */
+  letter-spacing: -0.0111em;
+}
+
+h4,
+.h4 {
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 30px; /* 125% */
+  letter-spacing: -0.0087em;
+}
+
+h5,
+.h5 {
+  font-size: 21px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 26px; /* 123.81% */
+  letter-spacing: -0.0057em;
+}
+
+h6,
+.h6 {
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 24px; /* 126.316% */
+  letter-spacing: -0.0032em;
+}
+
+p,
+.body {
+  font-size: 17px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 22px; /* 129.412% */
+  letter-spacing: 0;
+}
+
+small,
+.small {
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 20px; /* 133.333% */
+  letter-spacing: 0.004em;
+}
+
+.caption {
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px; /* 138.462% */
+  letter-spacing: 0.0092em;
+}
+
+.bold {
+  font-weight: var(--font-weight-bold);
+}

@@ -1,0 +1,10 @@
+.sticker {
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+
+.disabled {
+  filter: contrast(0.2) saturate(0) brightness(1.8);
+  opacity: 0.4;
+}

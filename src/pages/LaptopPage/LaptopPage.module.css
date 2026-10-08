@@ -1,0 +1,165 @@
+/* body {
+  background-color: black;
+} */
+
+.content {
+  height: 100dvh;
+  margin: auto;
+  max-width: 600px;
+  padding: var(--app-safe-area-top) var(--app-safe-area-right) var(--app-safe-area-bottom) var(--app-safe-area-left);
+  user-select: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imageArea {
+  width: 100%;
+  max-width: 450px;
+  max-height: 800px;
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 56px;
+  text-align: center;
+  color: oklch(from var(--seed) 50% calc(c * 0.15) h);
+  background-color: oklch(from var(--seed) 98% calc(c * 0.07) h);
+  border-radius: 24px;
+  overflow: clip;
+}
+
+.laptopWrapper {
+  width: 100%;
+}
+
+.laptop {
+  --top: oklch(from var(--seed) 93% calc(c * 0.15) h);
+  --bottom: oklch(from var(--seed) 68% calc(c * 0.15) h);
+  --border: oklch(from var(--seed) 82% calc(c * 0.15) h);
+
+  aspect-ratio: 16/11;
+  width: 452px;
+  transform: rotate(5deg) translateX(18%);
+  background: linear-gradient(180deg, var(--top) 0%, var(--bottom) 100%);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow:
+    0 2px 1px 0 oklch(from var(--seed) 98% calc(c * 0.15) h) inset,
+    0 -2px 1px 0 oklch(from var(--seed) 60% calc(c * 0.15) h) inset;
+
+  display: grid;
+  place-items: center;
+  position: relative;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.logo {
+  fill: oklch(from var(--seed) 98% calc(c * 0.15) h);
+  opacity: 0.4;
+  transform: translateY(-10%) scale(0.85);
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.placedSticker {
+  position: absolute;
+  z-index: 0;
+  width: var(--sticker-size);
+  margin: 0;
+  left: var(--sticker-x);
+  top: var(--sticker-y);
+  transform: translate(-50%, -50%) rotate(var(--sticker-rotation));
+}
+
+.controls {
+  position: relative;
+  width: 100%;
+  max-width: 450px;
+  border-radius: 24px;
+  background-color: var(--surface-layer-1);
+  overflow: clip;
+}
+
+.stickersRow {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  overflow-x: scroll;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.emptyMessage {
+  width: 100%;
+  padding: 24px 12px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.stickerSelector {
+  all: unset;
+
+  border-radius: 12px;
+  flex-shrink: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  margin: 0;
+  width: 84px;
+  display: grid;
+  place-items: center;
+  background-color: transparent;
+
+  & > figure {
+    margin: 0;
+    transform: scale(0.9);
+    transition: transform 0.15s;
+  }
+}
+
+.selected {
+  background-color: var(--surface-layer-translucent);
+
+  & > figure {
+    transform: scale(0.8);
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  padding: 0 12px 12px 12px;
+}
+
+.colorPicker {
+  position: relative;
+  width: 52px;
+  height: 52px;
+}
+
+.colorInput {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
+.colorSwatch {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}

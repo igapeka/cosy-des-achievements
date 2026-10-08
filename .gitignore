@@ -1,0 +1,50 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Dependencies, build output, caches
+coverage/
+*.tsbuildinfo
+*.log
+.DS_Store
+
+# Local environment and private data
+.env
+.env.*
+!.env.example
+.private/
+
+# Local instructions, prompts, status and supporting documents
+**/*.md
+/docs/
+/instructions/
+/prompts/
+
+# Local demo data, scratch files and verification output
+/.local/
+/src/mocks/
+/tmp/
+/screenshots/
+/test-results/
+/playwright-report/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

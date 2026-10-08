@@ -1,0 +1,47 @@
+.content {
+  height: 100dvh;
+  max-width: 600px;
+  margin: auto;
+  padding-block: var(--app-safe-area-top) var(--app-safe-area-bottom);
+  padding-inline: calc(32px + var(--app-safe-area-left)) calc(32px + var(--app-safe-area-right));
+  display: grid;
+  gap: 24px;
+  align-content: center;
+  text-align: center;
+  text-wrap: balance;
+  user-select: none;
+
+  & p {
+    margin-block-end: 16px;
+  }
+}
+
+.display {
+  width: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  touch-action: none;
+  cursor: grab;
+  transition: transform 350ms ease-out;
+
+  &[data-dragging="true"] {
+    transition: none;
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.bg {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: -999;
+  width: 200vh;
+  aspect-ratio: 1;
+  pointer-events: none;
+  filter: blur(20px);
+  opacity: 0.2;
+}
