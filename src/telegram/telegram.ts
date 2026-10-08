@@ -5,6 +5,7 @@ import {
   miniApp,
   retrieveLaunchParams,
   retrieveRawInitData,
+  swipeBehavior,
   viewport,
 } from "@tma.js/sdk-react";
 import type { RetrieveLaunchParamsResult } from "@tma.js/sdk-react";
@@ -50,6 +51,7 @@ export function initializeTelegram(): TelegramSession {
   if (isTelegram && sdkInitialized) {
     setupBackButton();
     setupViewport();
+    setupSwipeBehavior();
   }
 
   return session;
@@ -79,6 +81,18 @@ function setupViewport() {
       // Viewport and safe-area support varies between Telegram clients.
     }
   })();
+}
+
+function setupSwipeBehavior() {
+  try {
+    if (!swipeBehavior.mount.isAvailable()) return;
+    swipeBehavior.mount();
+    if (swipeBehavior.disableVertical.isAvailable()) {
+      swipeBehavior.disableVertical();
+    }
+  } catch {
+    // Vertical swipe control is unavailable in older Telegram clients.
+  }
 }
 
 export function markTelegramReady() {
