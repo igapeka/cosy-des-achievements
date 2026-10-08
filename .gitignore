@@ -32,6 +32,7 @@ coverage/
 
 # Local demo data, scratch files and verification output
 /.local/
+/public/__local-mocks/
 /src/mocks/
 /tmp/
 /screenshots/
