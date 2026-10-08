@@ -2,8 +2,7 @@
   height: 100dvh;
   max-width: 600px;
   margin: auto;
-  padding-block: var(--app-safe-area-top) var(--app-safe-area-bottom);
-  padding-inline: calc(32px + var(--app-safe-area-left)) calc(32px + var(--app-safe-area-right));
+  padding-inline: 32px;
   display: grid;
   gap: 24px;
   align-content: center;
