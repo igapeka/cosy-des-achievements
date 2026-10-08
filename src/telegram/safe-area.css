@@ -1,18 +1,26 @@
 :root {
-  --app-safe-area-top: max(
-    env(safe-area-inset-top, 0px),
-    var(--tg-viewport-content-safe-area-inset-top, 0px)
+  --app-safe-area-top: calc(
+    max(
+      env(safe-area-inset-top, 0px),
+      var(--tg-viewport-safe-area-inset-top, 0px)
+    ) + var(--tg-viewport-content-safe-area-inset-top, 0px)
   );
-  --app-safe-area-right: max(
-    env(safe-area-inset-right, 0px),
-    var(--tg-viewport-content-safe-area-inset-right, 0px)
+  --app-safe-area-right: calc(
+    max(
+      env(safe-area-inset-right, 0px),
+      var(--tg-viewport-safe-area-inset-right, 0px)
+    ) + var(--tg-viewport-content-safe-area-inset-right, 0px)
   );
-  --app-safe-area-bottom: max(
-    env(safe-area-inset-bottom, 0px),
-    var(--tg-viewport-content-safe-area-inset-bottom, 0px)
+  --app-safe-area-bottom: calc(
+    max(
+      env(safe-area-inset-bottom, 0px),
+      var(--tg-viewport-safe-area-inset-bottom, 0px)
+    ) + var(--tg-viewport-content-safe-area-inset-bottom, 0px)
   );
-  --app-safe-area-left: max(
-    env(safe-area-inset-left, 0px),
-    var(--tg-viewport-content-safe-area-inset-left, 0px)
+  --app-safe-area-left: calc(
+    max(
+      env(safe-area-inset-left, 0px),
+      var(--tg-viewport-safe-area-inset-left, 0px)
+    ) + var(--tg-viewport-content-safe-area-inset-left, 0px)
   );
 }
