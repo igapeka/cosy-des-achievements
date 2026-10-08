@@ -18,6 +18,7 @@ import CollectionPage from "../pages/CollectionPage/CollectionPage";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
 import LaptopPage from "../pages/LaptopPage/LaptopPage";
 import { LaptopDraftProvider } from "../pages/LaptopPage/LaptopDraft";
+import { useLaptopDraft } from "../pages/LaptopPage/laptopDraftContext";
 import MainPage from "../pages/MainPage/MainPage";
 import { BootstrapProvider } from "../catalog/BootstrapContext";
 import { useBootstrapCatalog } from "../catalog/bootstrap-context";
@@ -65,16 +66,16 @@ export function RootLayout() {
 
   return (
     <>
-      <TelegramBackButtonController
-        enabled={!startupError && (Boolean(bootstrap) || query.isError || Boolean(denial))}
-        bootstrap={bootstrap}
-      />
       {runtimeMode === "telegram" && <TelegramActivationQuerySync />}
       <LaptopDraftProvider
         key={ownerId ?? "no-user"}
         ownerId={ownerId}
         ownedStickerIds={ownedStickerIds}
       >
+        <TelegramBackButtonController
+          enabled={!startupError && (Boolean(bootstrap) || query.isError || Boolean(denial))}
+          bootstrap={bootstrap}
+        />
         {errorMessage ? (
           <ErrorPage message={errorMessage} />
         ) : missingTelegramSession ? (
@@ -149,8 +150,13 @@ function TelegramBackButtonController({
 }) {
   const router = useRouter();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const { exportError, setExportError } = useLaptopDraft();
   const handleBack = useCallback(() => {
     if (!enabled) return;
+    if (pathname === "/laptop" && exportError) {
+      setExportError(null);
+      return;
+    }
     const stickerId = pathname.startsWith("/stickers/")
       ? pathname.slice("/stickers/".length)
       : null;
@@ -169,7 +175,7 @@ function TelegramBackButtonController({
       },
       parentCollectionPath,
     );
-  }, [bootstrap, enabled, pathname, router]);
+  }, [bootstrap, enabled, exportError, pathname, router, setExportError]);
 
   useEffect(() => {
     const unsubscribe = subscribeToNativeBackButton(handleBack);
@@ -274,6 +280,8 @@ export function AchievementRoutePage() {
 
 export function LaptopRoutePage() {
   const bootstrap = useBootstrapCatalog();
+  const { exportError } = useLaptopDraft();
+  if (exportError) return <ErrorPage message={exportError} />;
 
   const username = bootstrap.user.username;
   const userLabel = username ? `@${username}` : getUserDisplayName(bootstrap);

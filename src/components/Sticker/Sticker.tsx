@@ -26,6 +26,7 @@ const Sticker = ({
     >
       <img
         src={src}
+        crossOrigin="anonymous"
         alt={alt}
         className={
           disabled ? `${styles.sticker} ${styles.disabled}` : styles.sticker

@@ -6,6 +6,8 @@ export type LaptopDraftValue = {
   setSeed: Dispatch<SetStateAction<string>>;
   selectedStickers: StickerPlacement[];
   setSelectedStickers: Dispatch<SetStateAction<StickerPlacement[]>>;
+  exportError: string | null;
+  setExportError: Dispatch<SetStateAction<string | null>>;
 };
 
 export const LaptopDraftContext = createContext<LaptopDraftValue | null>(null);

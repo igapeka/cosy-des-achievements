@@ -9,6 +9,7 @@ import {
   createStickerLayout,
   getRandomStickerPlacement,
 } from "./layout";
+import { downloadBlob, embedImagesForExport } from "./export-assets";
 
 const EXPORT_SCALE = 3;
 
@@ -26,7 +27,13 @@ type LaptopPageProps = {
 const LaptopPage = ({ stickers, userLabel }: LaptopPageProps) => {
   const imageAreaRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const { seed, setSeed, selectedStickers, setSelectedStickers } = useLaptopDraft();
+  const {
+    seed,
+    setSeed,
+    selectedStickers,
+    setSelectedStickers,
+    setExportError,
+  } = useLaptopDraft();
   const stickersById = new Map(stickers.map((sticker) => [sticker.id, sticker]));
 
   const toggleSticker = (id: string) => {
@@ -35,7 +42,7 @@ const LaptopPage = ({ stickers, userLabel }: LaptopPageProps) => {
         return current.filter((sticker) => sticker.id !== id);
       }
 
-              const sticker = getRandomStickerPlacement(id, current);
+      const sticker = getRandomStickerPlacement(id, current);
       if (sticker) return [...current, sticker];
 
       // Если свободное место не нашлось с первого расчёта, строим заново всю
@@ -59,24 +66,32 @@ const LaptopPage = ({ stickers, userLabel }: LaptopPageProps) => {
 
     setIsSaving(true);
 
+    let restoreImageSources: (() => void) | undefined;
     try {
+      const images = [...imageArea.querySelectorAll("img")];
+      if (images.length !== selectedStickers.length) {
+        throw new Error("Не все выбранные стикеры отображаются на ноутбуке.");
+      }
+      restoreImageSources = await embedImagesForExport(imageArea);
       await document.fonts.ready;
       const image = await toBlob(imageArea, {
         pixelRatio: EXPORT_SCALE,
         preferredFontFormat: "woff2",
+        onImageErrorHandler: () => {
+          throw new Error("Не удалось встроить изображение стикера в PNG.");
+        },
       });
 
-      if (!image) throw new Error("Не удалось создать изображение");
+      if (!image || image.size === 0) throw new Error("Не удалось создать PNG.");
 
-      const url = URL.createObjectURL(image);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "des-achievements.png";
-      link.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Не удалось сохранить изображение", error);
+      downloadBlob(image, "des-achievements.png");
+      setExportError(null);
+    } catch {
+      setExportError(
+        "Не удалось сохранить ноутбук: проверьте загрузку выбранных стикеров и попробуйте позже.",
+      );
     } finally {
+      restoreImageSources?.();
       setIsSaving(false);
     }
   };

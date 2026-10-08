@@ -30,6 +30,7 @@ export function LaptopDraftProvider({
     seed: "#000000",
     selectedStickers: [],
   });
+  const [exportError, setExportError] = useState<string | null>(null);
   const ownedIdsKey = ownedStickerIds.join("\u0000");
   const [syncedCatalog, setSyncedCatalog] = useState({ ownerId, ownedIdsKey });
 
@@ -75,6 +76,8 @@ export function LaptopDraftProvider({
         setSeed,
         selectedStickers: draft.selectedStickers,
         setSelectedStickers,
+        exportError,
+        setExportError,
       }}
     >
       {children}
