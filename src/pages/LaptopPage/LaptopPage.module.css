@@ -1,18 +1,23 @@
-/* body {
-  background-color: black;
-} */
-
 .content {
   height: 100dvh;
   margin: auto;
   max-width: 600px;
-  padding: var(--app-safe-area-top) var(--app-safe-area-right) var(--app-safe-area-bottom) var(--app-safe-area-left);
+  padding: var(--app-safe-area-top) var(--app-safe-area-right)
+    var(--app-safe-area-bottom) var(--app-safe-area-left);
   user-select: none;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   gap: 8px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: black;
+    z-index: -999;
+  }
 }
 
 .imageArea {
@@ -80,6 +85,7 @@
   position: relative;
   width: 100%;
   max-width: 450px;
+  padding-bottom: var(--app-safe-area-bottom);
   border-radius: 24px;
   background-color: var(--surface-layer-1);
   overflow: clip;
