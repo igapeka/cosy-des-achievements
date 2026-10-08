@@ -2,7 +2,7 @@
   height: 100dvh;
   margin: auto;
   max-width: 600px;
-  padding-top: var(--app-safe-area-top);
+  padding-top: calc(20px + var(--app-safe-area-top));
   padding-bottom: var(--app-safe-area-bottom);
   padding-left: calc(16px + var(--app-safe-area-left));
   padding-right: calc(16px + var(--app-safe-area-right));

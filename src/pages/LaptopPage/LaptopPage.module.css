@@ -2,8 +2,6 @@
   height: 100dvh;
   margin: auto;
   max-width: 600px;
-  padding: var(--app-safe-area-top) var(--app-safe-area-right)
-    var(--app-safe-area-bottom) var(--app-safe-area-left);
   user-select: none;
   display: flex;
   justify-content: center;
