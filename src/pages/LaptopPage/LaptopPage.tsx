@@ -1,7 +1,7 @@
 import styles from "./LaptopPage.module.css";
 import Button from "../../components/Button/Button";
 import { useRef, useState, type CSSProperties } from "react";
-import { toBlob } from "html-to-image";
+import { toPng } from "html-to-image";
 import Sticker from "../../components/Sticker/Sticker";
 import Icon from "../../components/Icon/Icon";
 import { useLaptopDraft } from "./laptopDraftContext";
@@ -9,7 +9,7 @@ import {
   createStickerLayout,
   getRandomStickerPlacement,
 } from "./layout";
-import { downloadBlob, embedImagesForExport } from "./export-assets";
+import { embedImagesForExport } from "./export-assets";
 
 const EXPORT_SCALE = 3;
 
@@ -22,9 +22,10 @@ export type LaptopSticker = {
 type LaptopPageProps = {
   stickers: LaptopSticker[];
   userLabel: string;
+  onOpenExport: (imageDataUrl: string) => void;
 };
 
-const LaptopPage = ({ stickers, userLabel }: LaptopPageProps) => {
+const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
   const imageAreaRef = useRef<HTMLDivElement>(null);
   const [isSaving, setIsSaving] = useState(false);
   const {
@@ -74,7 +75,7 @@ const LaptopPage = ({ stickers, userLabel }: LaptopPageProps) => {
       }
       restoreImageSources = await embedImagesForExport(imageArea);
       await document.fonts.ready;
-      const image = await toBlob(imageArea, {
+      const imageDataUrl = await toPng(imageArea, {
         pixelRatio: EXPORT_SCALE,
         preferredFontFormat: "woff2",
         onImageErrorHandler: () => {
@@ -82,10 +83,12 @@ const LaptopPage = ({ stickers, userLabel }: LaptopPageProps) => {
         },
       });
 
-      if (!image || image.size === 0) throw new Error("Не удалось создать PNG.");
+      if (!imageDataUrl.startsWith("data:image/png")) {
+        throw new Error("Не удалось создать PNG.");
+      }
 
-      downloadBlob(image, "des-achievements.png");
       setExportError(null);
+      onOpenExport(imageDataUrl);
     } catch {
       setExportError(
         "Не удалось сохранить ноутбук: проверьте загрузку выбранных стикеров и попробуйте позже.",

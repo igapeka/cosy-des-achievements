@@ -8,6 +8,7 @@ import type { RuntimeMode } from "../telegram/runtime";
 import {
   AchievementRoutePage,
   CollectionRoutePage,
+  ExportPreviewRoutePage,
   LaptopRoutePage,
   MainRoutePage,
   NotFoundPage,
@@ -49,11 +50,18 @@ const laptopRoute = createRoute({
   component: LaptopRoutePage,
 });
 
+const exportPreviewRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/laptop/export/$previewId",
+  component: ExportPreviewRoutePage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   collectionRoute,
   stickerRoute,
   laptopRoute,
+  exportPreviewRoute,
 ]);
 
 export function createAppRouter(

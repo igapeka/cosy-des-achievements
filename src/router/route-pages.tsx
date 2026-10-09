@@ -16,6 +16,11 @@ import type { BootstrapResponse } from "../types/api";
 import AchievementPage from "../pages/AchievementPage/AchievementPage";
 import CollectionPage from "../pages/CollectionPage/CollectionPage";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
+import ExportPreviewPage from "../pages/ExportPreviewPage/ExportPreviewPage";
+import {
+  createExportPreview,
+  getExportPreview,
+} from "../pages/ExportPreviewPage/exportPreviewStore";
 import LaptopPage from "../pages/LaptopPage/LaptopPage";
 import { LaptopDraftProvider } from "../pages/LaptopPage/LaptopDraft";
 import { useLaptopDraft } from "../pages/LaptopPage/laptopDraftContext";
@@ -280,6 +285,8 @@ export function AchievementRoutePage() {
 
 export function LaptopRoutePage() {
   const bootstrap = useBootstrapCatalog();
+  const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const { exportError } = useLaptopDraft();
   if (exportError) return <ErrorPage message={exportError} />;
 
@@ -291,5 +298,27 @@ export function LaptopRoutePage() {
     alt: sticker.title,
   }));
 
-  return <LaptopPage stickers={stickers} userLabel={userLabel} />;
+  return (
+    <LaptopPage
+      stickers={stickers}
+      userLabel={userLabel}
+      onOpenExport={(imageDataUrl) => {
+        const previewId = createExportPreview(imageDataUrl);
+        const to = `/laptop/export/${previewId}`;
+        recordInternalNavigation(pathname, to);
+        void navigate({ to: "/laptop/export/$previewId", params: { previewId } });
+      }}
+    />
+  );
+}
+
+export function ExportPreviewRoutePage() {
+  const { previewId } = useParams({ from: "/laptop/export/$previewId" });
+  const imageDataUrl = getExportPreview(previewId);
+
+  if (!imageDataUrl) {
+    return <ErrorPage message="Предпросмотр недоступен. Создайте картинку ещё раз." />;
+  }
+
+  return <ExportPreviewPage imageDataUrl={imageDataUrl} />;
 }

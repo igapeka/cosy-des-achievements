@@ -9,7 +9,7 @@ import { RouterProvider } from "@tanstack/react-router";
 
 const nativeBack = vi.hoisted(() => ({ handler: null as null | VoidFunction }));
 
-vi.mock("html-to-image", () => ({ toBlob: vi.fn() }));
+vi.mock("html-to-image", () => ({ toPng: vi.fn() }));
 vi.mock("../../telegram/telegram", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../telegram/telegram")>();
   return {
@@ -23,7 +23,7 @@ vi.mock("../../telegram/telegram", async (importOriginal) => {
   };
 });
 
-import { toBlob } from "html-to-image";
+import { toPng } from "html-to-image";
 
 const mounted: Array<{ root: Root; container: HTMLElement }> = [];
 const originalDecode = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "decode");
@@ -66,15 +66,6 @@ function stubLoadedImages() {
     configurable: true,
     value: { ready: Promise.resolve() },
   });
-  Object.defineProperty(URL, "createObjectURL", {
-    configurable: true,
-    value: vi.fn(() => "blob:laptop-export"),
-  });
-  Object.defineProperty(URL, "revokeObjectURL", {
-    configurable: true,
-    value: vi.fn(),
-  });
-  vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
 }
 
 afterEach(async () => {
@@ -90,7 +81,7 @@ afterEach(async () => {
 });
 
 describe("laptop export", () => {
-  it("waits for remote sticker data before downloading the complete PNG", async () => {
+  it("waits for remote sticker data before opening the complete PNG preview", async () => {
     stubLoadedImages();
     const fetchMock = vi.fn().mockResolvedValue(
       {
@@ -100,7 +91,8 @@ describe("laptop export", () => {
       },
     );
     vi.stubGlobal("fetch", fetchMock);
-    vi.mocked(toBlob).mockResolvedValue(new Blob(["png"], { type: "image/png" }));
+    const imageDataUrl = "data:image/png;base64,cG5n";
+    vi.mocked(toPng).mockResolvedValue(imageDataUrl);
     const container = await mountLaptop();
 
     await act(async () => {
@@ -109,15 +101,15 @@ describe("laptop export", () => {
     await act(async () => {
       [...container.querySelectorAll<HTMLButtonElement>("button")]
         .find((button) => button.textContent?.includes("Сохранить"))!.click();
-      await vi.waitFor(() => expect(toBlob).toHaveBeenCalledOnce());
+      await vi.waitFor(() => expect(toPng).toHaveBeenCalledOnce());
     });
 
     expect(fetchMock).toHaveBeenCalledWith(remoteImage, { mode: "cors", credentials: "omit" });
     expect(container.textContent).not.toContain("Не удалось сохранить ноутбук");
-    expect(toBlob).toHaveBeenCalledOnce();
-    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledOnce();
-    expect(container.textContent).not.toContain("Не удалось сохранить ноутбук");
-    expect(container.querySelector('button[aria-label="Выбрать стикер Третий"]')?.getAttribute("aria-pressed")).toBe("true");
+    expect(toPng).toHaveBeenCalledOnce();
+    await vi.waitFor(() =>
+      expect(container.querySelector('img[alt="Готовая картинка с ноутбуком"]')?.getAttribute("src")).toBe(imageDataUrl),
+    );
   });
 
   it("shows ErrorPage on image failure and native Back restores the unchanged draft", async () => {
@@ -125,7 +117,7 @@ describe("laptop export", () => {
     const failedImage = `${remoteImage}?failed-export=1`;
     const fetchMock = vi.fn().mockRejectedValue(new TypeError("CORS blocked"));
     vi.stubGlobal("fetch", fetchMock);
-    vi.mocked(toBlob).mockReset();
+    vi.mocked(toPng).mockReset();
     const container = await mountLaptop(failedImage);
 
     await act(async () => {
@@ -140,7 +132,7 @@ describe("laptop export", () => {
     expect(fetchMock).toHaveBeenCalledWith(failedImage, { mode: "cors", credentials: "omit" });
     expect(container.textContent).toContain("Не удалось сохранить ноутбук");
     expect(container.querySelectorAll("button, a")).toHaveLength(0);
-    expect(toBlob).not.toHaveBeenCalled();
+    expect(toPng).not.toHaveBeenCalled();
     expect(nativeBack.handler).toBeTypeOf("function");
 
     await act(async () => nativeBack.handler?.());

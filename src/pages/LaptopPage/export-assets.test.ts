@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { downloadBlob, embedImagesForExport } from "./export-assets";
+import { embedImagesForExport } from "./export-assets";
 
 const originalDecode = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "decode");
 
@@ -60,22 +60,5 @@ describe("laptop export assets", () => {
     expect(area.querySelector("img")?.getAttribute("src")).toBe(
       "https://images.example/blocked.webp",
     );
-  });
-
-  it("revokes the download URL after giving the browser time to start the download", () => {
-    vi.useFakeTimers();
-    const createObjectURL = vi.fn().mockReturnValue("blob:export");
-    const revokeObjectURL = vi.fn();
-    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createObjectURL });
-    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: revokeObjectURL });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-
-    downloadBlob(new Blob(["png"], { type: "image/png" }), "des-achievements.png");
-
-    expect(click).toHaveBeenCalledOnce();
-    expect(revokeObjectURL).not.toHaveBeenCalled();
-    vi.advanceTimersByTime(1000);
-    expect(revokeObjectURL).toHaveBeenCalledWith("blob:export");
-    vi.useRealTimers();
   });
 });
