@@ -1,21 +1,10 @@
 import styles from "./LaptopPage.module.css";
 import Button from "../../components/Button/Button";
-import { useRef, useState, type CSSProperties } from "react";
-import { toPng } from "html-to-image";
+import { type CSSProperties } from "react";
 import Sticker from "../../components/Sticker/Sticker";
 import Icon from "../../components/Icon/Icon";
 import { useLaptopDraft } from "./laptopDraftContext";
-import {
-  createStickerLayout,
-  getRandomStickerPlacement,
-} from "./layout";
-import {
-  embedImagesForExport,
-  shareExportImage,
-  waitForExportPaint,
-} from "./export-assets";
-
-const EXPORT_SCALE = 3;
+import { createStickerLayout, getRandomStickerPlacement } from "./layout";
 
 export type LaptopSticker = {
   id: string;
@@ -26,20 +15,19 @@ export type LaptopSticker = {
 type LaptopPageProps = {
   stickers: LaptopSticker[];
   userLabel: string;
-  onOpenExport: (imageDataUrl: string) => void;
+  onOpenExport: () => void;
 };
 
 const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
-  const imageAreaRef = useRef<HTMLDivElement>(null);
-  const [isSaving, setIsSaving] = useState(false);
   const {
     seed,
     setSeed,
     selectedStickers,
     setSelectedStickers,
-    setExportError,
   } = useLaptopDraft();
-  const stickersById = new Map(stickers.map((sticker) => [sticker.id, sticker]));
+  const stickersById = new Map(
+    stickers.map((sticker) => [sticker.id, sticker]),
+  );
 
   const toggleSticker = (id: string) => {
     setSelectedStickers((current) => {
@@ -65,54 +53,11 @@ const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
     );
   };
 
-  const saveImage = async () => {
-    const imageArea = imageAreaRef.current;
-    if (!imageArea || isSaving) return;
-
-    setIsSaving(true);
-
-    let restoreImageSources: (() => void) | undefined;
-    try {
-      const images = [...imageArea.querySelectorAll("img")];
-      if (images.length !== selectedStickers.length) {
-        throw new Error("Не все выбранные стикеры отображаются на ноутбуке.");
-      }
-      restoreImageSources = await embedImagesForExport(imageArea);
-      await document.fonts.ready;
-      await waitForExportPaint();
-      const imageDataUrl = await toPng(imageArea, {
-        pixelRatio: EXPORT_SCALE,
-        preferredFontFormat: "woff2",
-        onImageErrorHandler: () => {
-          throw new Error("Не удалось встроить изображение стикера в PNG.");
-        },
-      });
-
-      if (!imageDataUrl.startsWith("data:image/png")) {
-        throw new Error("Не удалось создать PNG.");
-      }
-
-      setExportError(null);
-      const shareResult = await shareExportImage(imageDataUrl);
-      if (shareResult === "cancelled") return;
-      if (shareResult === "shared") return;
-
-      // Старый экран остаётся только запасным вариантом для браузеров без
-      // Web Share API. В штатном сценарии картинка сразу уходит в share sheet.
-      onOpenExport(imageDataUrl);
-    } catch {
-      setExportError(
-        "Не удалось сохранить ноутбук: проверьте загрузку выбранных стикеров и попробуйте позже.",
-      );
-    } finally {
-      restoreImageSources?.();
-      setIsSaving(false);
-    }
-  };
+  const saveImage = () => onOpenExport();
 
   return (
     <div className={styles.content} style={{ "--seed": seed } as CSSProperties}>
-      <div className={styles.imageArea} ref={imageAreaRef}>
+      <div className={styles.imageArea}>
         <div className={styles.laptopWrapper}>
           <div className={styles.laptop}>
             {selectedStickers.map((placement) => {
@@ -155,24 +100,28 @@ const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
         <div className={styles.stickersRow}>
           {stickers.length === 0 ? (
             <p className={styles.emptyMessage}>Пока нет полученных стикеров</p>
-          ) : stickers.map((sticker) => (
-            <button
-              key={sticker.id}
-              type="button"
-              className={`${styles.stickerSelector} ${
-                selectedStickers.some((selected) => selected.id === sticker.id)
-                  ? styles.selected
-                  : ""
-              }`}
-              aria-label={`Выбрать стикер ${sticker.alt}`}
-              aria-pressed={selectedStickers.some(
-                (selected) => selected.id === sticker.id,
-              )}
-              onClick={() => toggleSticker(sticker.id)}
-            >
-              <Sticker src={sticker.src} alt={sticker.alt} />
-            </button>
-          ))}
+          ) : (
+            stickers.map((sticker) => (
+              <button
+                key={sticker.id}
+                type="button"
+                className={`${styles.stickerSelector} ${
+                  selectedStickers.some(
+                    (selected) => selected.id === sticker.id,
+                  )
+                    ? styles.selected
+                    : ""
+                }`}
+                aria-label={`Выбрать стикер ${sticker.alt}`}
+                aria-pressed={selectedStickers.some(
+                  (selected) => selected.id === sticker.id,
+                )}
+                onClick={() => toggleSticker(sticker.id)}
+              >
+                <Sticker src={sticker.src} alt={sticker.alt} />
+              </button>
+            ))
+          )}
         </div>
         <div className={styles.buttons}>
           <div className={styles.colorPicker}>
@@ -207,11 +156,10 @@ const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
           />
           <Button
             variant="primary"
-            icon={<Icon name="icon-save.svg" />}
+            icon={<Icon name="icon-expand.svg" />}
             onClick={saveImage}
-            disabled={isSaving}
           >
-            {isSaving ? "Сохранение…" : "Сохранить"}
+            Сохранить
           </Button>
         </div>
       </div>

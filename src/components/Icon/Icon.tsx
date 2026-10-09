@@ -1,11 +1,13 @@
 import type { HTMLAttributes } from "react";
 import iconImage from "../../assets/icons/icon-image.svg";
+import iconExpand from "../../assets/icons/icon-expand.svg";
 import iconSave from "../../assets/icons/icon-save.svg";
 import iconShuffle from "../../assets/icons/icon-shuffle.svg";
 import styles from "./Icon.module.css";
 
 const iconAssets = {
   "icon-image.svg": iconImage,
+  "icon-expand.svg": iconExpand,
   "icon-shuffle.svg": iconShuffle,
   "icon-save.svg": iconSave,
 } as const;

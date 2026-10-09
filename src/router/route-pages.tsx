@@ -17,10 +17,6 @@ import AchievementPage from "../pages/AchievementPage/AchievementPage";
 import CollectionPage from "../pages/CollectionPage/CollectionPage";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
 import ExportPreviewPage from "../pages/ExportPreviewPage/ExportPreviewPage";
-import {
-  createExportPreview,
-  getExportPreview,
-} from "../pages/ExportPreviewPage/exportPreviewStore";
 import LaptopPage from "../pages/LaptopPage/LaptopPage";
 import { LaptopDraftProvider } from "../pages/LaptopPage/LaptopDraft";
 import { useLaptopDraft } from "../pages/LaptopPage/laptopDraftContext";
@@ -302,23 +298,33 @@ export function LaptopRoutePage() {
     <LaptopPage
       stickers={stickers}
       userLabel={userLabel}
-      onOpenExport={(imageDataUrl) => {
-        const previewId = createExportPreview(imageDataUrl);
-        const to = `/laptop/export/${previewId}`;
+      onOpenExport={() => {
+        const to = "/laptop/export";
         recordInternalNavigation(pathname, to);
-        void navigate({ to: "/laptop/export/$previewId", params: { previewId } });
+        void navigate({ to: "/laptop/export" });
       }}
     />
   );
 }
 
 export function ExportPreviewRoutePage() {
-  const { previewId } = useParams({ from: "/laptop/export/$previewId" });
-  const imageDataUrl = getExportPreview(previewId);
+  const bootstrap = useBootstrapCatalog();
+  const { seed, selectedStickers } = useLaptopDraft();
+  if (!bootstrap) return <ErrorPage message="Каталог недоступен." />;
+  const username = bootstrap.user.username;
+  const userLabel = username ? `@${username}` : getUserDisplayName(bootstrap);
+  const stickers = getOwnedStickersInCatalogOrder(bootstrap).map((sticker) => ({
+    id: sticker.id,
+    src: sticker.imageUrl,
+    alt: sticker.title,
+  }));
 
-  if (!imageDataUrl) {
-    return <ErrorPage message="Предпросмотр недоступен. Создайте картинку ещё раз." />;
-  }
-
-  return <ExportPreviewPage imageDataUrl={imageDataUrl} />;
+  return (
+    <ExportPreviewPage
+      stickers={stickers}
+      userLabel={userLabel}
+      seed={seed}
+      selectedStickers={selectedStickers}
+    />
+  );
 }

@@ -1,21 +1,25 @@
 .content {
   width: 100%;
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding:
-    var(--app-safe-area-top)
-    var(--app-safe-area-right)
-    var(--app-safe-area-bottom)
-    var(--app-safe-area-left);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+  padding: var(--app-safe-area-top) var(--app-safe-area-right)
+    var(--app-safe-area-bottom) var(--app-safe-area-left);
   background: #000;
+  text-wrap: balance;
+  text-align: center;
 }
 
-.image {
-  display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: calc(100dvh - var(--app-safe-area-top) - var(--app-safe-area-bottom));
-  object-fit: contain;
+.imageArea {
+  width: min(100%, 450px);
+  border-radius: 0;
+}
+
+.hint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.4);
+  max-width: 300px;
 }

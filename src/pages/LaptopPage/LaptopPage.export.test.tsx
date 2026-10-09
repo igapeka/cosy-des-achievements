@@ -9,7 +9,6 @@ import { RouterProvider } from "@tanstack/react-router";
 
 const nativeBack = vi.hoisted(() => ({ handler: null as null | VoidFunction }));
 
-vi.mock("html-to-image", () => ({ toPng: vi.fn() }));
 vi.mock("../../telegram/telegram", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../telegram/telegram")>();
   return {
@@ -23,17 +22,10 @@ vi.mock("../../telegram/telegram", async (importOriginal) => {
   };
 });
 
-import { toPng } from "html-to-image";
-
 const mounted: Array<{ root: Root; container: HTMLElement }> = [];
-const originalDecode = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "decode");
-const remoteImage =
-  "https://fphxbiwjvyfjxkuyjowm.supabase.co/storage/v1/object/public/stickers/manual/vyezdnye/azerbaydzhan-sticker.webp";
 
-async function mountLaptop(imageUrl = remoteImage) {
+async function mountLaptop() {
   const catalog = createCatalog();
-  const sticker = catalog.stickers.find((item) => item.id === "s3")!;
-  sticker.imageUrl = imageUrl;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   client.setQueryData(getBootstrapQueryKey(catalog.user.telegramId), catalog);
   const router = createAppRouter({
@@ -55,19 +47,6 @@ async function mountLaptop(imageUrl = remoteImage) {
   return container;
 }
 
-function stubLoadedImages() {
-  vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(true);
-  vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(72);
-  Object.defineProperty(HTMLImageElement.prototype, "decode", {
-    configurable: true,
-    value: vi.fn().mockResolvedValue(undefined),
-  });
-  Object.defineProperty(document, "fonts", {
-    configurable: true,
-    value: { ready: Promise.resolve() },
-  });
-}
-
 afterEach(async () => {
   for (const { root, container } of mounted.splice(0)) {
     await act(async () => root.unmount());
@@ -76,23 +55,10 @@ afterEach(async () => {
   nativeBack.handler = null;
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
-  if (originalDecode) Object.defineProperty(HTMLImageElement.prototype, "decode", originalDecode);
-  else Reflect.deleteProperty(HTMLImageElement.prototype, "decode");
 });
 
-describe("laptop export", () => {
-  it("waits for remote sticker data before opening the complete PNG preview", async () => {
-    stubLoadedImages();
-    const fetchMock = vi.fn().mockResolvedValue(
-      {
-        ok: true,
-        status: 200,
-        blob: async () => new Blob(["webp"], { type: "image/webp" }),
-      },
-    );
-    vi.stubGlobal("fetch", fetchMock);
-    const imageDataUrl = "data:image/png;base64,cG5n";
-    vi.mocked(toPng).mockResolvedValue(imageDataUrl);
+describe("laptop screenshot preview", () => {
+  it("opens the live image without controls or image export", async () => {
     const container = await mountLaptop();
 
     await act(async () => {
@@ -101,24 +67,15 @@ describe("laptop export", () => {
     await act(async () => {
       [...container.querySelectorAll<HTMLButtonElement>("button")]
         .find((button) => button.textContent?.includes("Сохранить"))!.click();
-      await vi.waitFor(() => expect(toPng).toHaveBeenCalledOnce());
     });
 
-    expect(fetchMock).toHaveBeenCalledWith(remoteImage, { mode: "cors", credentials: "omit" });
-    expect(container.textContent).not.toContain("Не удалось сохранить ноутбук");
-    expect(toPng).toHaveBeenCalledOnce();
-    await vi.waitFor(() =>
-      expect(container.querySelector('img[alt="Готовая картинка с ноутбуком"]')?.getAttribute("src")).toBe(imageDataUrl),
-    );
+    expect(container.textContent).toContain("Паршивый телеграм не даёт сохранять картинки");
+    expect(container.querySelector('img[alt="Третий"]')).not.toBeNull();
+    expect(container.querySelectorAll("button")).toHaveLength(0);
   });
 
-  it("shows ErrorPage on image failure and native Back restores the unchanged draft", async () => {
-    stubLoadedImages();
-    const failedImage = `${remoteImage}?failed-export=1`;
-    const fetchMock = vi.fn().mockRejectedValue(new TypeError("CORS blocked"));
-    vi.stubGlobal("fetch", fetchMock);
-    vi.mocked(toPng).mockReset();
-    const container = await mountLaptop(failedImage);
+  it("native Back returns to the unchanged draft", async () => {
+    const container = await mountLaptop();
 
     await act(async () => {
       container.querySelector<HTMLButtonElement>('button[aria-label="Выбрать стикер Третий"]')!.click();
@@ -127,12 +84,7 @@ describe("laptop export", () => {
       [...container.querySelectorAll<HTMLButtonElement>("button")]
         .find((button) => button.textContent?.includes("Сохранить"))!.click();
     });
-    await vi.waitFor(() => expect(container.textContent).toContain("Не удалось сохранить ноутбук"));
-
-    expect(fetchMock).toHaveBeenCalledWith(failedImage, { mode: "cors", credentials: "omit" });
-    expect(container.textContent).toContain("Не удалось сохранить ноутбук");
-    expect(container.querySelectorAll("button, a")).toHaveLength(0);
-    expect(toPng).not.toHaveBeenCalled();
+    expect(container.textContent).toContain("Паршивый телеграм не даёт сохранять картинки");
     expect(nativeBack.handler).toBeTypeOf("function");
 
     await act(async () => nativeBack.handler?.());

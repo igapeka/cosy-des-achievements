@@ -52,7 +52,7 @@ const laptopRoute = createRoute({
 
 const exportPreviewRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/laptop/export/$previewId",
+  path: "/laptop/export",
   component: ExportPreviewRoutePage,
 });
 
