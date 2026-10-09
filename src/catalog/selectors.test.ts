@@ -113,7 +113,7 @@ describe("catalog selectors", () => {
       status: "owned",
       sticker: { imageUrl: "/s3.webp", description: "Описание s3", awardedAt: "2026-03-03T00:00:00.000Z" },
     });
-    expect(getAchievementData(catalog, "s1")).toEqual({ status: "not-owned" });
+    expect(getAchievementData(catalog, "s1")).toMatchObject({ status: "not-owned", sticker: { id: "s1" } });
     expect(getAchievementData(catalog, "unknown-sticker")).toEqual({ status: "missing" });
   });
 

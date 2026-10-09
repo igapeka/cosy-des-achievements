@@ -248,7 +248,7 @@ export function CollectionRoutePage() {
           disabled: !sticker.owned,
         }))}
       onOpenSticker={(stickerId) => {
-        if (getAchievementData(bootstrap, stickerId).status !== "owned") return;
+        if (getAchievementData(bootstrap, stickerId).status === "missing") return;
         const to = `/stickers/${stickerId}`;
         recordInternalNavigation(pathname, to);
         void navigate({ to: "/stickers/$stickerId", params: { stickerId } });
@@ -265,7 +265,6 @@ export function AchievementRoutePage() {
   if (achievement.status === "missing") {
     return <ErrorPage message="Стикер не найден." />;
   }
-  if (achievement.status === "not-owned") return null;
   const { sticker } = achievement;
 
   return (
@@ -274,6 +273,7 @@ export function AchievementRoutePage() {
       alt={sticker.title}
       description={sticker.description}
       awardedAt={sticker.awardedAt}
+      disabled={achievement.status === "not-owned"}
     />
   );
 }

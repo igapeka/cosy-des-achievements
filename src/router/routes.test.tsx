@@ -69,7 +69,7 @@ describe("catalog routes", () => {
     expect(container.querySelectorAll('button[aria-label="Назад"], button[aria-label="Обновить"], button[aria-label="Повторить"]')).toHaveLength(0);
   });
 
-  it("keeps the current collection when a disabled sticker gets click, touch, or keyboard input", async () => {
+  it("opens a disabled sticker for viewing without its award date", async () => {
     const { container, router } = await mountRouter();
     const folder = [...container.querySelectorAll('[role="button"]')].find((item) =>
       item.textContent?.includes("Первая"),
@@ -83,22 +83,15 @@ describe("catalog routes", () => {
 
     const disabledFigure = container.querySelector('img[alt="Первый"]')?.closest("figure");
     expect(disabledFigure).not.toBeNull();
-    const events = [
-      new MouseEvent("click", { bubbles: true }),
-      new Event("touchend", { bubbles: true }),
-      new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
-      new KeyboardEvent("keydown", { key: " ", bubbles: true }),
-    ];
+    await act(async () => {
+      disabledFigure!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    });
 
-    for (const event of events) {
-      await act(async () => {
-        disabledFigure!.dispatchEvent(event);
-      });
-    }
-
-    expect(router.state.location.pathname).toBe("/collections/collection-a");
-    expect(container.querySelector("h1")?.textContent).toBe("Первая");
-    expect(container.textContent).not.toContain("🤷");
+    expect(router.state.location.pathname).toBe("/stickers/s1");
+    expect(container.textContent).toContain("Описание s1");
+    expect(container.textContent).not.toContain("3 марта 2026");
+    expect(container.querySelectorAll("img")).toHaveLength(1);
+    expect(container.querySelector("img")?.className).toContain("disabled");
     expect(container.querySelector('[role="alert"]')).toBeNull();
     expect(container.textContent).not.toMatch(/Повторить|Обновить|Достижение ещё не получено/);
   });

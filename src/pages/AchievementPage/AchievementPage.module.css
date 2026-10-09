@@ -32,6 +32,17 @@
   }
 }
 
+.disabled {
+  touch-action: auto;
+  cursor: default;
+  transform: none !important;
+  will-change: auto;
+
+  &:active {
+    cursor: default;
+  }
+}
+
 .bg {
   position: fixed;
   top: 50%;

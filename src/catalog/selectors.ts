@@ -60,7 +60,7 @@ export function getAchievementData(
 ) {
   const sticker = catalog.stickers.find((item) => item.id === stickerId);
   if (!sticker) return { status: "missing" as const };
-  if (!sticker.owned) return { status: "not-owned" as const };
+  if (!sticker.owned) return { status: "not-owned" as const, sticker };
   return { status: "owned" as const, sticker };
 }
 

@@ -21,7 +21,7 @@ const Sticker = ({
   return (
     <figure
       className={className}
-      onClick={disabled ? undefined : onClick}
+      onClick={onClick}
       style={style}
     >
       <img

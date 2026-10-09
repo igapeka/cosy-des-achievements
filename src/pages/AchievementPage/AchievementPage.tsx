@@ -7,6 +7,7 @@ type AchievementPageProps = {
   alt: string;
   description: string;
   awardedAt: string | null;
+  disabled?: boolean;
 };
 
 const formatAwardedAt = (value: string | null) => {
@@ -25,8 +26,9 @@ const AchievementPage = ({
   alt,
   description,
   awardedAt,
+  disabled = false,
 }: AchievementPageProps) => {
-  const awardedAtLabel = formatAwardedAt(awardedAt);
+  const awardedAtLabel = disabled ? null : formatAwardedAt(awardedAt);
   const dragStart = useRef<{
     x: number;
     y: number;
@@ -87,22 +89,22 @@ const AchievementPage = ({
     <>
       <div className={styles.content}>
         <div
-          className={styles.display}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          onPointerLeave={(event) => {
+          className={disabled ? `${styles.display} ${styles.disabled}` : styles.display}
+          onPointerDown={disabled ? undefined : handlePointerDown}
+          onPointerMove={disabled ? undefined : handlePointerMove}
+          onPointerUp={disabled ? undefined : handlePointerUp}
+          onPointerCancel={disabled ? undefined : handlePointerUp}
+          onPointerLeave={disabled ? undefined : (event) => {
             if (event.pointerType === "mouse") handlePointerUp(event);
           }}
         >
-          <Sticker src={src} alt={alt} />
+          <Sticker src={src} alt={alt} disabled={disabled} />
         </div>
         <div>
           <p>{description}</p>
           {awardedAtLabel && <small className="caption">{awardedAtLabel}</small>}
         </div>
-        <Sticker src={src} alt={alt} className={styles.bg} />
+        {!disabled && <Sticker src={src} alt={alt} className={styles.bg} />}
       </div>
     </>
   );
