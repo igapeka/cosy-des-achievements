@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { embedImagesForExport } from "./export-assets";
+import { embedImagesForExport, shareExportImage } from "./export-assets";
 
 const originalDecode = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "decode");
 
@@ -60,5 +60,23 @@ describe("laptop export assets", () => {
     expect(area.querySelector("img")?.getAttribute("src")).toBe(
       "https://images.example/blocked.webp",
     );
+  });
+
+  it("passes a PNG file directly to the native share sheet", async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    const canShare = vi.fn().mockReturnValue(true);
+    vi.stubGlobal("navigator", { share, canShare });
+
+    await expect(
+      shareExportImage("data:image/png;base64,cG5n"),
+    ).resolves.toBe("shared");
+
+    expect(canShare).toHaveBeenCalledWith({
+      files: [expect.any(File)],
+    });
+    expect(share).toHaveBeenCalledWith({
+      title: "DES Ачивки",
+      files: [expect.any(File)],
+    });
   });
 });

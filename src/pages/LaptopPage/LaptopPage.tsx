@@ -1,7 +1,7 @@
 import styles from "./LaptopPage.module.css";
 import Button from "../../components/Button/Button";
 import { useRef, useState, type CSSProperties } from "react";
-import { toPng } from "html-to-image";
+import { toSvg } from "html-to-image";
 import Sticker from "../../components/Sticker/Sticker";
 import Icon from "../../components/Icon/Icon";
 import { useLaptopDraft } from "./laptopDraftContext";
@@ -9,7 +9,11 @@ import {
   createStickerLayout,
   getRandomStickerPlacement,
 } from "./layout";
-import { embedImagesForExport } from "./export-assets";
+import {
+  embedImagesForExport,
+  rasterizeSvgToPng,
+  shareExportImage,
+} from "./export-assets";
 
 const EXPORT_SCALE = 3;
 
@@ -75,19 +79,26 @@ const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
       }
       restoreImageSources = await embedImagesForExport(imageArea);
       await document.fonts.ready;
-      const imageDataUrl = await toPng(imageArea, {
-        pixelRatio: EXPORT_SCALE,
+      const svgDataUrl = await toSvg(imageArea, {
         preferredFontFormat: "woff2",
         onImageErrorHandler: () => {
           throw new Error("Не удалось встроить изображение стикера в PNG.");
         },
       });
-
-      if (!imageDataUrl.startsWith("data:image/png")) {
-        throw new Error("Не удалось создать PNG.");
-      }
+      const imageDataUrl = await rasterizeSvgToPng(
+        svgDataUrl,
+        imageArea.clientWidth,
+        imageArea.clientHeight,
+        EXPORT_SCALE,
+      );
 
       setExportError(null);
+      const shareResult = await shareExportImage(imageDataUrl);
+      if (shareResult === "cancelled") return;
+      if (shareResult === "shared") return;
+
+      // Старый экран остаётся только запасным вариантом для браузеров без
+      // Web Share API. В штатном сценарии картинка сразу уходит в share sheet.
       onOpenExport(imageDataUrl);
     } catch {
       setExportError(
