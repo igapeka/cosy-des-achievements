@@ -6,6 +6,7 @@ import {
   retrieveLaunchParams,
   retrieveRawInitData,
   swipeBehavior,
+  themeParams,
   viewport,
 } from "@tma.js/sdk-react";
 import type { RetrieveLaunchParamsResult } from "@tma.js/sdk-react";
@@ -60,6 +61,8 @@ export function initializeTelegram(): TelegramSession {
 
 function setupBackgroundColor() {
   try {
+    if (themeParams.mount.isAvailable()) themeParams.mount();
+    if (miniApp.mount.isAvailable()) miniApp.mount();
     if (!miniApp.setBgColor.isAvailable()) return;
     const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     miniApp.setBgColor(isDark ? "#131416" : "#f3f5f5");
