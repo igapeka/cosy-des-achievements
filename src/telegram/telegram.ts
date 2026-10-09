@@ -49,12 +49,23 @@ export function initializeTelegram(): TelegramSession {
   session = { isTelegram, telegramId, initData, launchParams };
 
   if (isTelegram && sdkInitialized) {
+    setupBackgroundColor();
     setupBackButton();
     setupViewport();
     setupSwipeBehavior();
   }
 
   return session;
+}
+
+function setupBackgroundColor() {
+  try {
+    if (!miniApp.setBgColor.isAvailable()) return;
+    const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    miniApp.setBgColor(isDark ? "#131416" : "#f3f5f5");
+  } catch {
+    // Background color support varies between Telegram clients.
+  }
 }
 
 export function getTelegramSession() {
