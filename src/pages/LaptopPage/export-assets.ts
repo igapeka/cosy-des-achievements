@@ -1,5 +1,5 @@
 const imageDataUrlCache = new Map<string, Promise<string>>();
-const IOS_SVG_RASTERIZATION_DELAY_MS = 250;
+const EXPORT_PAINT_SETTLE_DELAY_MS = 250;
 
 function waitForImage(
   image: HTMLImageElement,
@@ -23,39 +23,13 @@ function waitForImage(
   return image.decode ? image.decode() : Promise.resolve();
 }
 
-/**
- * iOS WebKit can paint a foreignObject SVG before its nested images have
- * reached the rasterizer. Waiting after decoding the SVG gives it one stable
- * paint window before it is copied into the PNG canvas.
- */
-export async function rasterizeSvgToPng(
-  svgDataUrl: string,
-  width: number,
-  height: number,
-  pixelRatio: number,
-): Promise<string> {
-  const image = new Image();
-  image.decoding = "sync";
-  image.src = svgDataUrl;
-  await waitForImage(image, "Не удалось подготовить картинку для сохранения.");
+/** Lets iOS commit recently assigned data:image sources before html-to-image clones them. */
+export async function waitForExportPaint(): Promise<void> {
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   await new Promise<void>((resolve) => {
-    window.setTimeout(resolve, IOS_SVG_RASTERIZATION_DELAY_MS);
+    window.setTimeout(resolve, EXPORT_PAINT_SETTLE_DELAY_MS);
   });
-
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.ceil(width * pixelRatio);
-  canvas.height = Math.ceil(height * pixelRatio);
-  const context = canvas.getContext("2d");
-  if (!context) {
-    throw new Error("Не удалось подготовить холст для сохранения.");
-  }
-  context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-  const imageDataUrl = canvas.toDataURL("image/png");
-  if (!imageDataUrl.startsWith("data:image/png")) {
-    throw new Error("Не удалось создать PNG.");
-  }
-  return imageDataUrl;
 }
 
 export type NativeShareResult = "shared" | "cancelled" | "unavailable" | "failed";

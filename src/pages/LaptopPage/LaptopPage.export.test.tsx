@@ -9,7 +9,7 @@ import { RouterProvider } from "@tanstack/react-router";
 
 const nativeBack = vi.hoisted(() => ({ handler: null as null | VoidFunction }));
 
-vi.mock("html-to-image", () => ({ toSvg: vi.fn() }));
+vi.mock("html-to-image", () => ({ toPng: vi.fn() }));
 vi.mock("../../telegram/telegram", async (importOriginal) => {
   const actual = await importOriginal<typeof import("../../telegram/telegram")>();
   return {
@@ -23,7 +23,7 @@ vi.mock("../../telegram/telegram", async (importOriginal) => {
   };
 });
 
-import { toSvg } from "html-to-image";
+import { toPng } from "html-to-image";
 
 const mounted: Array<{ root: Root; container: HTMLElement }> = [];
 const originalDecode = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "decode");
@@ -66,12 +66,6 @@ function stubLoadedImages() {
     configurable: true,
     value: { ready: Promise.resolve() },
   });
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
-    drawImage: vi.fn(),
-  } as unknown as CanvasRenderingContext2D);
-  vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(
-    "data:image/png;base64,cG5n",
-  );
 }
 
 afterEach(async () => {
@@ -98,7 +92,7 @@ describe("laptop export", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
     const imageDataUrl = "data:image/png;base64,cG5n";
-    vi.mocked(toSvg).mockResolvedValue("data:image/svg+xml,export");
+    vi.mocked(toPng).mockResolvedValue(imageDataUrl);
     const container = await mountLaptop();
 
     await act(async () => {
@@ -107,12 +101,12 @@ describe("laptop export", () => {
     await act(async () => {
       [...container.querySelectorAll<HTMLButtonElement>("button")]
         .find((button) => button.textContent?.includes("Сохранить"))!.click();
-      await vi.waitFor(() => expect(toSvg).toHaveBeenCalledOnce());
+      await vi.waitFor(() => expect(toPng).toHaveBeenCalledOnce());
     });
 
     expect(fetchMock).toHaveBeenCalledWith(remoteImage, { mode: "cors", credentials: "omit" });
     expect(container.textContent).not.toContain("Не удалось сохранить ноутбук");
-    expect(toSvg).toHaveBeenCalledOnce();
+    expect(toPng).toHaveBeenCalledOnce();
     await vi.waitFor(() =>
       expect(container.querySelector('img[alt="Готовая картинка с ноутбуком"]')?.getAttribute("src")).toBe(imageDataUrl),
     );
@@ -123,7 +117,7 @@ describe("laptop export", () => {
     const failedImage = `${remoteImage}?failed-export=1`;
     const fetchMock = vi.fn().mockRejectedValue(new TypeError("CORS blocked"));
     vi.stubGlobal("fetch", fetchMock);
-    vi.mocked(toSvg).mockReset();
+    vi.mocked(toPng).mockReset();
     const container = await mountLaptop(failedImage);
 
     await act(async () => {
@@ -138,7 +132,7 @@ describe("laptop export", () => {
     expect(fetchMock).toHaveBeenCalledWith(failedImage, { mode: "cors", credentials: "omit" });
     expect(container.textContent).toContain("Не удалось сохранить ноутбук");
     expect(container.querySelectorAll("button, a")).toHaveLength(0);
-    expect(toSvg).not.toHaveBeenCalled();
+    expect(toPng).not.toHaveBeenCalled();
     expect(nativeBack.handler).toBeTypeOf("function");
 
     await act(async () => nativeBack.handler?.());

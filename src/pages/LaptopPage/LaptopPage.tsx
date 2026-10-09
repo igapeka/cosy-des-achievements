@@ -1,7 +1,7 @@
 import styles from "./LaptopPage.module.css";
 import Button from "../../components/Button/Button";
 import { useRef, useState, type CSSProperties } from "react";
-import { toSvg } from "html-to-image";
+import { toPng } from "html-to-image";
 import Sticker from "../../components/Sticker/Sticker";
 import Icon from "../../components/Icon/Icon";
 import { useLaptopDraft } from "./laptopDraftContext";
@@ -11,8 +11,8 @@ import {
 } from "./layout";
 import {
   embedImagesForExport,
-  rasterizeSvgToPng,
   shareExportImage,
+  waitForExportPaint,
 } from "./export-assets";
 
 const EXPORT_SCALE = 3;
@@ -79,18 +79,18 @@ const LaptopPage = ({ stickers, userLabel, onOpenExport }: LaptopPageProps) => {
       }
       restoreImageSources = await embedImagesForExport(imageArea);
       await document.fonts.ready;
-      const svgDataUrl = await toSvg(imageArea, {
+      await waitForExportPaint();
+      const imageDataUrl = await toPng(imageArea, {
+        pixelRatio: EXPORT_SCALE,
         preferredFontFormat: "woff2",
         onImageErrorHandler: () => {
           throw new Error("Не удалось встроить изображение стикера в PNG.");
         },
       });
-      const imageDataUrl = await rasterizeSvgToPng(
-        svgDataUrl,
-        imageArea.clientWidth,
-        imageArea.clientHeight,
-        EXPORT_SCALE,
-      );
+
+      if (!imageDataUrl.startsWith("data:image/png")) {
+        throw new Error("Не удалось создать PNG.");
+      }
 
       setExportError(null);
       const shareResult = await shareExportImage(imageDataUrl);
