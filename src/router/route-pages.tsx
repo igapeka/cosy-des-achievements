@@ -93,7 +93,7 @@ export function RootLayout() {
             <Outlet />
           </BootstrapProvider>
         ) : (
-          <ErrorPage message="Загружаем каталог…" />
+          <ErrorPage message="Загружаем каталог…" emoji="⏳" />
         )}
       </LaptopDraftProvider>
     </>
